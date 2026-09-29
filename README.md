@@ -1,201 +1,215 @@
-# A Comparative Evaluation of Hallucination in Large Language Models for English and Indian Languages
+# A Comparative Evaluation of Hallucination in Large Language Models for English and Hindi
 
-> An empirical study of hallucination in Large Language Models through a controlled English–Hindi comparison across factual, numerical, reasoning, and cultural/contextual tasks.
+This repository contains a paired-question study of model responses in English and Hindi. The question bank and response-collection pipeline are present; response collection has been carried out in two reported batches. Annotation and substantive hallucination analysis have not been completed, and the available response workbook contains only the second batch.
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat)
-![NLP](https://img.shields.io/badge/NLP-3776AB?style=flat)
-![LLM Evaluation](https://img.shields.io/badge/LLM%20Evaluation-4B0082?style=flat)
-![Multilingual AI](https://img.shields.io/badge/Multilingual%20AI-008080?style=flat)
-![Research](https://img.shields.io/badge/Research-555555?style=flat)
+## Research Overview
 
-## Overview
+The study is designed to compare how four large language models respond to the same underlying questions when asked in English and Hindi. It covers factual, numerical, reasoning, and cultural/India-specific questions. Each question has an English and Hindi version, along with an expected answer and source field to support later human evaluation.
 
-This project investigates hallucination in large language models (LLMs) through a controlled empirical comparison between **English** and **Hindi**. The same underlying question is presented in both languages, so that language is the primary factor being compared while the question content is held constant.
+The experiment collects raw answers; it does not automatically determine whether an answer is correct or hallucinated. No hallucination rates, model rankings, or comparative findings are reported in this repository.
 
-The study evaluates model responses across four planned task categories — factual, numerical, reasoning, and cultural/contextual tasks — using human annotation and quantitative/statistical analysis.
+## Research Objective
 
-This is an **empirical comparative study**, not a generic multilingual benchmark. The focus is on whether, and how, hallucination behaviour differs when the same question is asked in English versus Hindi.
-
-## Motivation
-
-Hallucination — the generation of fluent but incorrect or unsupported content — is most commonly evaluated in English. LLMs are increasingly used by Hindi and other Indian-language speakers in substantial numbers, yet evidence about hallucination behaviour in these languages remains comparatively limited.
-
-It is an open question whether models hallucinate at the same rate, in the same places, or in the same forms when the identical underlying question is posed in Hindi instead of English. Understanding such language-dependent behaviour matters both for evaluation practice and for the reliable deployment of language assistants in Indian-language contexts.
-
-## Research Objectives
-
-1. **Estimate** hallucination frequency for English and Hindi on matched question pairs, for each model.
-2. **Compare** hallucination rates between English and Hindi statistically, treating the underlying question as a paired (within-item) factor.
-3. **Examine** whether any language-dependent difference varies across the planned task categories (factual, numerical, reasoning, cultural/contextual).
-4. **Compare** several LLMs (3–4) to assess whether any language effect is consistent across models.
-5. **Characterise** the type and form of hallucinations in each language through qualitative error analysis.
+To collect comparable English and Hindi responses from four LLMs across four question categories, then use reference-based human annotation to study hallucination behavior by language, category, and model.
 
 ## Research Questions
 
-- **RQ1.** How does hallucination frequency differ between English and Hindi when LLMs are evaluated using semantically equivalent and parallel questions?
-- **RQ2.** How does hallucination frequency vary across different LLMs and task categories?
-- **RQ3.** What types of hallucinations are most prevalent in English and Hindi responses?
-- **RQ4.** Does the difference in hallucination rate between English and Hindi vary across task categories?
-- **RQ5.** Is the observed difference between English and Hindi hallucination rates statistically significant?
+- How does the occurrence and form of unsupported or incorrect content differ between English and Hindi for paired questions?
+- How does response quality vary across factual, numerical, reasoning, and cultural/India-specific questions?
+- How do responses differ across the four evaluated models?
+- Do any language differences vary by question category or model?
+- After annotation, are observed English-Hindi differences statistically distinguishable?
+
+These are research questions, not findings. The current analysis functions are placeholders and do not compute answers to them.
+
+## Dataset and Question Bank
+
+The source workbook is `data/raw/question_bank.xlsx`. It contains 200 unique questions, identified Q001–Q200, with 50 questions in each category:
+
+| Category in the question bank | Questions |
+|---|---:|
+| Factual | 50 |
+| Numerical | 50 |
+| Reasoning | 50 |
+| Cultural/India-specific | 50 |
+| **Total** | **200** |
+
+Each row contains an English question, a Hindi question, an expected answer, and a source. The experiment uses both language versions of every question. The workbook was inspected for this README: all 200 IDs are unique, and none of the required question, answer, or source fields are blank.
+
+## Models
+
+The configured models and API identifiers are:
+
+| Model name | Provider | API model ID |
+|---|---|---|
+| Gemini 3.5 Flash-Lite | Google Gemini | `gemini-3.5-flash-lite` |
+| GPT-OSS 120B | Groq | `openai/gpt-oss-120b` |
+| Cohere Command A | Cohere | `command-a-03-2025` |
+| Qwen 3.8 27B | Groq | `qwen/qwen3.8-27b` |
+
+These are the names and identifiers in the experiment pipeline; provider-side availability and behavior may change over time.
 
 ## Experimental Design
 
-The following design is **planned/proposed** and is subject to revision as the study progresses.
+Each of the 200 underlying questions has two language versions, and each version is sent to all four models once:
 
-| Component | Planned design |
-|---|---|
-| **Languages** | English and Hindi. |
-| **Question set** | Approximately 250 paired underlying questions, resulting in approximately 500 language-specific prompts (one English and one Hindi prompt per question). |
-| **Task categories** | Factual · Numerical · Reasoning · Cultural/Contextual. |
-| **Models** | 3–4 LLMs; exact models and versions will be finalized before experimentation. |
-| **Evaluation** | Human annotation of model responses against reliable reference answers/sources. |
-| **Analysis** | Hallucination rates, language/category/model comparisons, statistical testing, and qualitative error analysis. |
+**200 questions × 2 languages × 4 models × 1 run = 1,600 planned model responses.**
 
-The central design choice is the pairing of questions: the underlying question is held constant across languages, so that any observed differences can be attributed to language rather than to question content.
+The reported execution was split into two batches:
 
-## Methodology
+| Batch | Questions | Planned requests |
+|---|---|---:|
+| 1 | Q001–Q100 | 800 |
+| 2 | Q101–Q200 | 800 |
+| **Total** | **Q001–Q200** | **1,600** |
 
-The planned pipeline is:
+The pipeline uses one run per question-language-model combination (`NUM_RUNS = 1`), temperature 0, a maximum of 256 output tokens, and disables external tools and web search.
 
-```
-Question Curation
-→ English–Hindi Pairing
-→ Standardized Prompting
-→ LLM Response Collection
-→ Human Annotation
-→ Hallucination Classification
-→ Statistical Analysis
-→ Error Analysis
+## Prompting Methodology
+
+The prompt templates in `experiments/prompts.py` use the same neutral system instruction for all models and both languages:
+
+```text
+You are an AI assistant taking part in a research study. Respond to the question you are asked.
 ```
 
-A curated set of approximately 250 questions will be paired into English–Hindi equivalents that preserve the same underlying meaning. Each question will be accompanied by a reliable reference answer or source to support annotation.
+The English user prompt is `Question:` followed by the question and an `Answer:` marker. The Hindi user prompt uses `प्रश्न:` and `उत्तर:` around the Hindi question. The question text changes by language; the system instruction is constant. The prompts do not ask the model to be factual, cite sources, abstain when uncertain, or follow category-specific instructions. Category, expected answer, and source are retained as experiment metadata and are not inserted into the user prompt.
 
-Prompts will be constructed from standardized, neutral templates so that no instruction encourages or discourages hallucination. The same prompt structure and instruction will be used for both languages. Responses will be collected from 3–4 LLMs and stored unmodified for downstream analysis.
+## Experiment Pipeline
 
-Human annotators will classify each response using the preliminary label scheme described below, and adjudication will resolve disagreements. The resulting labels will support hallucination-rate estimation, statistical comparisons across languages, categories, and models, and qualitative error analysis.
+1. `experiments/run_experiment.py` reads the Excel question bank with pandas and checks for `Question ID`, `Category`, `English Question`, `Hindi Question`, `Expected Answer`, and `Source` columns. Empty-ID rows are skipped.
+2. It creates one prompt record in English and one in Hindi for each selected question, using `experiments/prompts.py`.
+3. It initializes one provider client per configured model through the factory in `experiments/model_runner.py`.
+4. It sends each prompt to each model. Provider-specific runners call the Gemini, Groq, or Cohere SDK. Requests are retried up to three attempts with exponential delays (2 seconds, then 4 seconds); exhausted exceptions are caught by the experiment loop and recorded as errors for that response.
+5. For each attempted response, the pipeline records question and source fields, model/provider identifiers, run number, generation settings, full system and user prompts, response text, status, error text, UTC start and finish timestamps, and latency.
+6. It writes the collected rows to `responses/raw_responses/experiment_responses.xlsx` as a single Excel worksheet. A run writes/overwrites this workbook; it does not append to or merge a previous batch automatically.
 
-## Evaluation Framework
+An error during client initialization occurs before per-request error handling and can stop a run. Error rows in the workbook represent requests that exhausted the configured retries; retries are not separate response rows.
 
-The annotation framework is preliminary and will be finalized before the main annotation stage. The current label scheme consists of:
+## Output Files and Analysis State
 
-- **Correct** — the response answers the question and is consistent with the reference answer/source.
-- **Partially Correct** — some relevant part is correct, but the response contains omissions, unsupported additions, or inaccuracies.
-- **Hallucinated** — content not supported by (or contradicting) the reference answer/source, presented with unjustified confidence.
-- **Refusal / No Answer** — the model declines to answer or provides no substantive answer.
-- **Unclear / Requires Adjudication** — the appropriate label is ambiguous and requires joint review.
+- `data/raw/question_bank.xlsx` — the 200-question English-Hindi question bank.
+- `responses/raw_responses/experiment_responses.xlsx` — the generated response workbook currently available in this workspace. It is ignored by Git through `.gitignore` and may not be present in a fresh clone.
+- `analysis/hallucination_rates.py`, `analysis/statistical_tests.py`, and `analysis/error_analysis.py` — analysis interfaces/placeholders; their functions raise `NotImplementedError` and produce no results.
+- `notebooks/exploratory_analysis.ipynb` — a placeholder notebook; it contains no completed analysis.
+- `results/tables/` and `results/figures/` — no generated result tables or figures are currently present.
+- `annotations/annotator_1/`, `annotations/annotator_2/`, and `annotations/final_labels/` — no annotation files are currently present. `annotations/annotation_guidelines.md` describes a preliminary framework.
 
-Final label definitions, boundary rules, and the adjudication protocol will be documented in `annotations/annotation_guidelines.md` before annotation begins.
+## Current Experiment Status
 
-## Related Work
+The 200-question bank is complete, and the project execution record describes two 100-question batches. However, the only generated response workbook available in this repository contains **800 rows for Q101–Q200**, which is the second batch. It contains all 100 questions × 2 languages × 4 models with no duplicate question-language-model-run combinations. No Q001–Q100 response workbook or merged 1,600-row output is present, so the first batch's response and failure counts cannot be verified from the current repository artifacts.
 
-Existing research on hallucination evaluation in Indian languages includes **BHRAM-IL**, a large multilingual benchmark for hallucination in Indian languages. This study discusses such work as related context while maintaining a different experimental design.
+Counts below therefore describe **the available 800-row workbook only**, not the full 1,600-request experiment:
 
-A verified citation for BHRAM-IL will be maintained in `paper/references.bib` as the literature review is finalized. No specific statistics or findings about BHRAM-IL are reported here.
+| Saved response status | Count |
+|---|---:|
+| Successful | 796 |
+| Failed after retries | 4 |
+| **Rows in workbook** | **800** |
 
-## How This Study Differs from BHRAM-IL
+Of the four saved failures, three GPT-OSS 120B rows report an empty response from Groq after three attempts. One Cohere Command A row records an HTTP 422 `NO_VALID_RESPONSE_GENERATED` error after three attempts. The workbook does not contain successful response text for these four rows. Gemini 3.5 Flash-Lite and Qwen 3.8 27B have 200 successful rows each in this batch; GPT-OSS 120B has 197 successful and 3 failed rows; Cohere Command A has 199 successful and 1 failed row.
 
-| Aspect | This Study | BHRAM-IL |
-|---|---|---|
-| **Primary scope** | Controlled English–Hindi hallucination comparison | Large multilingual hallucination benchmark |
-| **Languages** | English and Hindi | Multilingual, with a focus on Indian languages |
-| **Question design** | Paired questions; the same underlying question in both languages | Benchmark-scale multilingual question sets |
-| **Research objective** | Whether language affects hallucination frequency and characteristics | Broad hallucination evaluation across languages |
-| **Scale/emphasis** | Smaller, curated, carefully annotated comparative design | Large-scale benchmark design |
-
-The characterisation of BHRAM-IL above is limited to its description as a large multilingual hallucination benchmark for Indian languages. A verified citation will be maintained in `paper/references.bib`.
-
-## Repository Structure
-
-```
-comparative-llm-hallucination-indian-languages/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── .env.example
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── README.md
-├── experiments/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── prompts.py
-│   ├── model_runner.py
-│   └── run_experiment.py
-├── responses/
-│   ├── raw_responses/
-│   └── README.md
-├── annotations/
-│   ├── annotation_guidelines.md
-│   ├── annotator_1/
-│   ├── annotator_2/
-│   └── final_labels/
-├── analysis/
-│   ├── __init__.py
-│   ├── hallucination_rates.py
-│   ├── statistical_tests.py
-│   └── error_analysis.py
-├── results/
-│   ├── tables/
-│   └── figures/
-├── literature/
-│   ├── README.md
-│   └── literature_matrix.csv
-├── paper/
-│   ├── ieee/
-│   └── references.bib
-└── notebooks/
-    └── exploratory_analysis.ipynb
-```
+The response statuses above indicate whether a model call returned response text; they are **not** correctness or hallucination labels. No human annotation, hallucination scoring, statistical test, or result figure/table has been completed.
 
 ## Reproducibility and Setup
 
-The project targets **Python 3.12**.
+Use a Python installation with support for the dependencies in `requirements.txt`. The repository does not pin a Python version.
 
-Create a virtual environment:
+From the repository root, create and activate a virtual environment, then install dependencies:
 
-```bash
+```powershell
 python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-Activate the environment (Windows):
+Create a local `.env` file in the repository root with the API keys required by the current code:
 
-```bash
-.venv\Scripts\activate
+```dotenv
+GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
+COHERE_API_KEY=your_cohere_key
 ```
 
-Install the dependencies:
+Keep real credentials out of source control. The current `.env.example` contains older variable names; use the names above, which are the ones read by `experiments/model_runner.py`.
 
-```bash
-pip install -r requirements.txt
+Run the experiment from the repository root:
+
+```powershell
+python -m experiments.run_experiment
 ```
 
-API credentials, when eventually required, belong in a local `.env` file (copy `.env.example` and fill it in). The `.env` file is ignored by git and must never be committed.
+All three provider keys are needed because the runner initializes all four configured models. The `RUN_FULL_EXPERIMENT` constant in `experiments/run_experiment.py` controls selection; it is not exposed as a command-line option. When it is `True`, the script selects up to the first 200 questions. In the current code, when it is `False`, it selects `questions[100:200]` (Q101–Q200 for the supplied ordered bank). Although `PILOT_NUM_QUESTIONS` is defined in `experiments/config.py`, this current selection branch does not use it. The script writes to the same output path each time, so separate batch runs are not preserved or combined automatically.
 
-## Project Status
+## Limitations
 
-Research in progress. The repository currently contains the experimental architecture and supporting research infrastructure; model selection, question construction, response collection, annotation, and statistical analysis will be completed as part of the study.
+- The available output workbook represents only Q101–Q200; the Q001–Q100 response artifact is absent, preventing independent verification of complete response coverage and full-run success/failure totals.
+- Four calls in the available batch ended in errors. Failed calls have no response text and should not be treated as answered questions.
+- Each combination is sampled once at temperature 0, with a 256-token output limit. This does not measure run-to-run variability or behavior under other decoding settings.
+- Evaluation depends on future human annotation against the question-bank references. The annotation guidelines are preliminary, and no labels or inter-annotator agreement results are available.
+- The analysis modules are not implemented, and no hallucination-rate, category, language, model, or statistical results are available.
+- The study covers this 200-question English-Hindi question bank and the configured model identifiers; results, once produced, should not automatically be generalized to other languages, prompts, models, or versions.
+- Provider APIs may change, and API error behavior may affect reproducibility.
+
+## Planned Future Analysis
+
+After response coverage is reconciled and responses are annotated, planned work includes hallucination classification/scoring, English-versus-Hindi comparison on paired questions, category-wise and model-wise analysis, qualitative error analysis, and statistical analysis. These are planned steps only; no findings are reported here.
 
 ## Authors
 
-**Diya Pratap**
+**Diya Pratap** — B.Tech. Artificial Intelligence & Machine Learning, Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi. [GitHub](https://github.com/Diyapratap22)
 
-B.Tech. Artificial Intelligence & Machine Learning
-Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi
-GitHub: [Diyapratap22](https://github.com/Diyapratap22)
+**Kinjal Sidharth** — B.Tech. Artificial Intelligence & Machine Learning, Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi. [GitHub](https://github.com/Kinjal7127)
 
-**Kinjal Sidharth**
+**Shivam** — B.Tech. Artificial Intelligence & Machine Learning, Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi. [GitHub](https://github.com/Shivam-po)
 
-B.Tech. Artificial Intelligence & Machine Learning
-Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi
-GitHub: [Kinjal7127](https://github.com/Kinjal7127)
+## Repository Structure
 
-**Shivam**
+The following reflects the project files and directories currently present. The generated response workbook is a local, Git-ignored artifact; empty directories are represented by `.gitkeep` files.
 
-B.Tech. Artificial Intelligence & Machine Learning
-Dr. Akhilesh Das Gupta Institute of Professional Studies, GGSIPU, New Delhi
-GitHub: [Shivam-po](https://github.com/Shivam-po)
-
-## References
-
-Verified references will be added to `paper/references.bib` as the literature review is finalized. No unverified citations are included in this repository.
+```text
+.
+├── README.md
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── test_api_connections.py
+├── analysis/
+│   ├── __init__.py
+│   ├── error_analysis.py
+│   ├── hallucination_rates.py
+│   └── statistical_tests.py
+├── annotations/
+│   ├── annotation_guidelines.md
+│   ├── annotator_1/.gitkeep
+│   ├── annotator_2/.gitkeep
+│   └── final_labels/.gitkeep
+├── data/
+│   ├── README.md
+│   ├── processed/.gitkeep
+│   └── raw/
+│       ├── .gitkeep
+│       └── question_bank.xlsx
+├── experiments/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── model_runner.py
+│   ├── prompts.py
+│   └── run_experiment.py
+├── literature/
+│   ├── README.md
+│   └── literature_matrix.csv
+├── notebooks/
+│   └── exploratory_analysis.ipynb
+├── paper/
+│   ├── references.bib
+│   └── ieee/.gitkeep
+├── responses/
+│   ├── README.md
+│   └── raw_responses/
+│       ├── .gitkeep
+│       └── experiment_responses.xlsx  # local output; Git-ignored
+└── results/
+    ├── figures/.gitkeep
+    └── tables/.gitkeep
+```
