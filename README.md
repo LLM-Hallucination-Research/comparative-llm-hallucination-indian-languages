@@ -1,6 +1,6 @@
 # A Comparative Evaluation of Hallucination in Large Language Models for English and Hindi
 
-This repository contains a paired-question study of model responses in English and Hindi. The question bank and response-collection pipeline are present; response collection has been carried out in two reported batches. Annotation and substantive hallucination analysis have not been completed, and the available response workbook contains only the second batch.
+This repository contains a paired-question study of model responses in English and Hindi. The repository contains the complete question bank and the response-collection pipeline used for the study. The response-collection experiment was executed in two batches covering Q001–Q100 and Q101–Q200, corresponding to 1,600 planned model-question-language combinations. The current workspace retains the second batch as an 800-row response workbook; annotation and substantive hallucination analysis are the next stages of the study.
 
 ## Research Overview
 
@@ -97,7 +97,7 @@ An error during client initialization occurs before per-request error handling a
 
 ## Current Experiment Status
 
-The 200-question bank is complete, and the project execution record describes two 100-question batches. However, the only generated response workbook available in this repository contains **800 rows for Q101–Q200**, which is the second batch. It contains all 100 questions × 2 languages × 4 models with no duplicate question-language-model-run combinations. No Q001–Q100 response workbook or merged 1,600-row output is present, so the first batch's response and failure counts cannot be verified from the current repository artifacts.
+The 200-question bank is complete, and the full response-collection design was executed in two 100-question batches. Together, these batches cover the complete experimental matrix of 200 questions × 2 languages × 4 models = 1,600 planned model responses. The currently retained workbook contains the second batch, Q101–Q200, with 800 rows. The first batch was executed separately but its original workbook is not currently retained in the repository, so its exact saved success/failure counts cannot be independently verified from the present artifacts.
 
 Counts below therefore describe **the available 800-row workbook only**, not the full 1,600-request experiment:
 
@@ -141,19 +141,40 @@ python -m experiments.run_experiment
 
 All three provider keys are needed because the runner initializes all four configured models. The `RUN_FULL_EXPERIMENT` constant in `experiments/run_experiment.py` controls selection; it is not exposed as a command-line option. When it is `True`, the script selects up to the first 200 questions. In the current code, when it is `False`, it selects `questions[100:200]` (Q101–Q200 for the supplied ordered bank). Although `PILOT_NUM_QUESTIONS` is defined in `experiments/config.py`, this current selection branch does not use it. The script writes to the same output path each time, so separate batch runs are not preserved or combined automatically.
 
-## Limitations
+## Next Research Stage
 
-- The available output workbook represents only Q101–Q200; the Q001–Q100 response artifact is absent, preventing independent verification of complete response coverage and full-run success/failure totals.
-- Four calls in the available batch ended in errors. Failed calls have no response text and should not be treated as answered questions.
-- Each combination is sampled once at temperature 0, with a 256-token output limit. This does not measure run-to-run variability or behavior under other decoding settings.
-- Evaluation depends on future human annotation against the question-bank references. The annotation guidelines are preliminary, and no labels or inter-annotator agreement results are available.
-- The analysis modules are not implemented, and no hallucination-rate, category, language, model, or statistical results are available.
-- The study covers this 200-question English-Hindi question bank and the configured model identifiers; results, once produced, should not automatically be generalized to other languages, prompts, models, or versions.
-- Provider APIs may change, and API error behavior may affect reproducibility.
+With response collection completed, the next stage is to evaluate the collected model outputs against the reference answers. The planned workflow is:
 
-## Planned Future Analysis
+```text
+Raw Model Responses
+        ↓
+Response Validation
+        ↓
+Human Annotation
+        ↓
+Hallucination / Correctness Labels
+        ↓
+Language-wise Analysis
+        ↓
+Category-wise Analysis
+        ↓
+Model-wise Analysis
+        ↓
+Statistical Analysis
+        ↓
+Research Findings
+```
 
-After response coverage is reconciled and responses are annotated, planned work includes hallucination classification/scoring, English-versus-Hindi comparison on paired questions, category-wise and model-wise analysis, qualitative error analysis, and statistical analysis. These are planned steps only; no findings are reported here.
+The analysis will focus on:
+
+- English vs Hindi response behavior
+- Model-wise response patterns
+- Category-wise differences
+- Hallucination and error types
+- Qualitative examples
+- Statistical comparison of observed differences
+
+No performance ranking or hallucination-rate conclusion is claimed until the annotation and analysis stages are completed.
 
 ## Authors
 
